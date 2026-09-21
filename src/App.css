@@ -1,0 +1,1074 @@
+/* =========================================================
+   기본 설정
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* =========================================================
+   전체 앱
+========================================================= */
+
+.app {
+  width: 100%;
+  max-width: 900px;
+
+  margin: 0 auto;
+  padding: 56px 28px 100px;
+
+  color: #222;
+}
+
+
+/* =========================================================
+   공통 헤더
+========================================================= */
+
+.header {
+  margin-bottom: 42px;
+}
+
+.header h1 {
+  margin: 0 0 10px;
+
+  font-size: 38px;
+  font-weight: 700;
+
+  letter-spacing: -1.4px;
+}
+
+.header p {
+  margin: 0;
+
+  color: #888;
+
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   홈 화면
+   민법총칙 / 물권 / 채권총칙 / 채권각칙
+========================================================= */
+
+.part-list {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.part-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  min-height: 165px;
+
+  padding: 24px;
+
+  border: 1px solid #e6e6e2;
+  border-radius: 16px;
+
+  background: #fff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.part-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #d4d4cf;
+
+  background: #fdfdfb;
+
+  box-shadow:
+    0 5px 18px
+    rgba(0, 0, 0, 0.04);
+}
+
+.part-number {
+  margin-bottom: 18px;
+
+  color: #aaa;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  letter-spacing: 0.8px;
+}
+
+.part-card h2 {
+  margin: 0 0 8px;
+
+  color: #222;
+
+  font-size: 22px;
+  font-weight: 650;
+
+  letter-spacing: -0.7px;
+}
+
+.part-card p {
+  margin: 0;
+
+  color: #aaa;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   뒤로가기 버튼
+========================================================= */
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 30px;
+  padding: 7px 10px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #888;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.back-button:hover {
+  color: #222;
+
+  background: #f3f3f0;
+}
+
+
+/* =========================================================
+   편 페이지
+========================================================= */
+
+.part-page {
+  max-width: 820px;
+}
+
+
+/* 편 제목 */
+
+.part-header {
+  margin-bottom: 34px;
+}
+
+.part-label {
+  display: inline-block;
+
+  margin-bottom: 8px;
+
+  color: #999;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  letter-spacing: 0.4px;
+}
+
+.part-header h1 {
+  margin: 0 0 8px;
+
+  font-size: 32px;
+  font-weight: 700;
+
+  letter-spacing: -1px;
+}
+
+.part-header p {
+  margin: 0;
+
+  color: #999;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   편 안의 Topic 목록
+========================================================= */
+
+.topic-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.topic-card {
+  display: grid;
+
+  grid-template-columns:
+    46px
+    minmax(0, 1fr)
+    24px;
+
+  align-items: center;
+
+  width: 100%;
+  min-height: 58px;
+
+  padding: 10px 16px;
+
+  border: 1px solid #e8e8e4;
+  border-radius: 11px;
+
+  background: #fff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.topic-card:hover {
+  transform: translateX(2px);
+
+  border-color: #d7d7d2;
+
+  background: #fafaf8;
+}
+
+.topic-index {
+  color: #bbb;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.topic-title {
+  color: #292929;
+
+  font-size: 16px;
+  font-weight: 500;
+
+  letter-spacing: -0.3px;
+}
+
+.topic-arrow {
+  color: #bbb;
+
+  font-size: 22px;
+
+  text-align: right;
+}
+
+
+/* =========================================================
+   Topic 상세 페이지
+========================================================= */
+
+.topic-page {
+  max-width: 920px;
+}
+
+
+/* 상세 페이지 제목 */
+
+.topic-header {
+  margin-bottom: 28px;
+
+  padding-bottom: 22px;
+
+  border-bottom: 1px solid #ededE9;
+}
+
+.topic-header h1 {
+  margin: 0;
+
+  color: #222;
+
+  font-size: 34px;
+  font-weight: 700;
+
+  letter-spacing: -1.1px;
+}
+
+.topic-header .part-label {
+  margin-bottom: 9px;
+}
+
+
+/* topic 자체 note */
+
+.topic-note {
+  margin: 12px 0 0;
+
+  color: #888;
+
+  font-size: 14px;
+  line-height: 1.7;
+
+  white-space: pre-wrap;
+}
+
+
+/* =========================================================
+   모두 열기 / 모두 닫기
+========================================================= */
+
+.outline-controls {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 7px;
+
+  margin-bottom: 14px;
+}
+
+.outline-controls button {
+  padding: 6px 11px;
+
+  border: 1px solid #e1e1dd;
+  border-radius: 7px;
+
+  background: #fff;
+
+  color: #888;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.outline-controls button:hover {
+  border-color: #d1d1cc;
+
+  background: #f5f5f2;
+
+  color: #333;
+}
+
+
+/* =========================================================
+   목차 전체
+========================================================= */
+
+.outline-container {
+  width: 100%;
+
+  padding: 8px 0;
+}
+
+.outline-level {
+  width: 100%;
+}
+
+
+/* =========================================================
+   목차 한 줄
+========================================================= */
+
+.outline-row {
+  display: grid;
+
+  grid-template-columns:
+    42px
+    minmax(0, 1fr)
+    32px;
+
+  align-items: center;
+
+  width: 100%;
+  min-height: 42px;
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   목차 번호
+========================================================= */
+
+.outline-number {
+  color: #555;
+
+  user-select: none;
+}
+
+
+/* =========================================================
+   목차 제목
+
+   제목 클릭 → 메모 작성/수정
+========================================================= */
+
+.outline-title-button {
+  display: block;
+
+  width: 100%;
+
+  padding: 4px 6px;
+
+  border: none;
+  border-radius: 6px;
+  outline: none;
+
+  background: transparent;
+
+  color: inherit;
+
+  font: inherit;
+  font-weight: inherit;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.outline-title-button:hover {
+  background:
+    rgba(0, 0, 0, 0.025);
+}
+
+
+/* =========================================================
+   오른쪽 토글 영역
+========================================================= */
+
+.outline-action {
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  width: 32px;
+}
+
+
+/* =========================================================
+   > 토글
+
+   하위 목차가 있거나
+   작성된 메모가 있을 때 표시
+========================================================= */
+
+.outline-toggle {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 27px;
+  height: 27px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 6px;
+  outline: none;
+
+  background: transparent;
+
+  color: #aaa;
+
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 400;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.outline-toggle:hover {
+  background: #f0f0ed;
+
+  color: #444;
+}
+
+
+/*
+  > → 아래 방향으로 회전
+*/
+
+.outline-toggle.open {
+  transform: rotate(90deg);
+}
+
+
+/* =========================================================
+   단계별 글자 크기
+
+   1.
+   (1)
+   1)
+   ①
+========================================================= */
+
+.outline-level-0 > .outline-row {
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.outline-level-1 > .outline-row {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.outline-level-2 > .outline-row {
+  font-size: 17px;
+  font-weight: 450;
+}
+
+.outline-level-3 > .outline-row {
+  font-size: 16px;
+  font-weight: 400;
+}
+
+
+/* 4단계 이후 */
+
+.outline-level-4 > .outline-row,
+.outline-level-5 > .outline-row {
+  font-size: 15px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   하위 목차 들여쓰기
+========================================================= */
+
+.outline-children {
+  margin-left: 25px;
+}
+
+
+/* =========================================================
+   펼쳐진 내용
+   메모 + 하위 목차가 이 안에 위치
+========================================================= */
+
+.outline-expanded-content {
+  width: 100%;
+}
+
+
+/* =========================================================
+   메모 영역
+========================================================= */
+
+.outline-memo {
+  margin-top: 2px;
+  margin-bottom: 9px;
+
+  padding-right: 32px;
+}
+
+
+/* =========================================================
+   메모 작성창
+
+   제목을 클릭했을 때 표시
+========================================================= */
+
+.memo-editor {
+  display: block;
+
+  box-sizing: border-box;
+
+  width: 100%;
+  min-height: 44px;
+
+  padding: 9px 11px;
+
+  overflow: hidden;
+
+  resize: none;
+
+  border: 1px solid transparent;
+  border-radius: 7px;
+  outline: none;
+
+  background: #f7f7f4;
+
+  color: #444;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 400;
+
+  line-height: 1.75;
+  letter-spacing: -0.15px;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.memo-editor:hover {
+  background: #f4f4f1;
+}
+
+.memo-editor:focus {
+  border-color: #e2e2dd;
+
+  background: #f5f5f2;
+}
+
+.memo-editor::placeholder {
+  color: #bcbcb7;
+}
+
+
+/* =========================================================
+   저장된 메모
+
+   > 버튼을 눌렀을 때 표시
+========================================================= */
+
+.memo-display {
+  box-sizing: border-box;
+
+  width: 100%;
+
+  padding:
+    6px
+    11px
+    6px
+    12px;
+
+  border-left:
+    2px solid #ddddD7;
+
+  border-radius:
+    0 5px 5px 0;
+
+  background: transparent;
+
+  color: #626262;
+
+  font-size: 15px;
+  font-weight: 400;
+
+  line-height: 1.75;
+  letter-spacing: -0.15px;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+
+  cursor: text;
+
+  transition:
+    background 0.15s ease;
+}
+
+.memo-display:hover {
+  background:
+    rgba(0, 0, 0, 0.022);
+}
+
+
+/* =========================================================
+   JSON 안에 원래 존재하는 note
+========================================================= */
+
+.outline-note {
+  margin-top: 3px;
+  margin-bottom: 8px;
+
+  padding:
+    4px 8px;
+
+  color: #999;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  line-height: 1.65;
+
+  white-space: pre-wrap;
+}
+
+
+/* =========================================================
+   빈 목차
+========================================================= */
+
+.empty-outline {
+  padding: 30px 0;
+
+  color: #aaa;
+
+  font-size: 14px;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   태블릿
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .app {
+    padding:
+      44px
+      24px
+      90px;
+  }
+
+}
+
+/* =========================================================
+   홈페이지 백업
+========================================================= */
+
+.backup-section {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-top: 0;
+  margin-bottom: 36px;
+  padding-top: 14px;
+
+  border-top: 1px solid #e7e7e3;
+}
+
+
+/* 백업 설명 */
+
+.backup-info {
+  min-width: 0;
+}
+
+.backup-title {
+  margin-bottom: 5px;
+
+  color: #444;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.backup-time {
+  margin-top: 5px;
+
+  color: #b0b0ab;
+
+  font-size: 11px;
+}
+
+
+/* 버튼 영역 */
+
+.backup-actions {
+  display: flex;
+
+  flex-shrink: 0;
+
+  gap: 7px;
+}
+
+
+/* 공통 버튼 */
+
+.backup-button,
+.restore-button {
+  padding: 7px 12px;
+
+  border: 1px solid #dfdfda;
+  border-radius: 7px;
+
+  background: #fff;
+
+  color: #777;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.backup-button:hover,
+.restore-button:hover {
+  border-color: #ccccC7;
+
+  background: #f4f4f1;
+
+  color: #333;
+}
+
+
+/* =========================================================
+   모바일
+========================================================= */
+
+@media (max-width: 700px) {
+
+  /* 전체 */
+
+  .app {
+    padding:
+      30px
+      18px
+      70px;
+  }
+
+
+  /* 홈 */
+
+  .header {
+    margin-bottom: 28px;
+  }
+
+  .header h1 {
+    font-size: 31px;
+  }
+
+  .part-list {
+    grid-template-columns: 1fr;
+
+    gap: 11px;
+  }
+
+  .part-card {
+    min-height: 130px;
+
+    padding: 20px;
+  }
+
+  .part-card h2 {
+    font-size: 20px;
+  }
+
+
+  /* 편 페이지 */
+
+  .part-header {
+    margin-bottom: 25px;
+  }
+
+  .part-header h1 {
+    font-size: 28px;
+  }
+
+  .topic-card {
+    grid-template-columns:
+      38px
+      minmax(0, 1fr)
+      20px;
+
+    min-height: 54px;
+
+    padding:
+      9px
+      12px;
+  }
+
+  .topic-title {
+    font-size: 15px;
+  }
+
+
+  /* 상세 페이지 */
+
+  .topic-header {
+    margin-bottom: 20px;
+
+    padding-bottom: 18px;
+  }
+
+  .topic-header h1 {
+    font-size: 29px;
+  }
+
+
+  /* 목차 */
+
+  .outline-row {
+    grid-template-columns:
+      36px
+      minmax(0, 1fr)
+      29px;
+
+    min-height: 39px;
+  }
+
+  .outline-children {
+    margin-left: 16px;
+  }
+
+
+  /* 글자 크기 */
+
+  .outline-level-0 > .outline-row {
+    font-size: 18px;
+  }
+
+  .outline-level-1 > .outline-row {
+    font-size: 17px;
+  }
+
+  .outline-level-2 > .outline-row {
+    font-size: 16px;
+  }
+
+  .outline-level-3 > .outline-row {
+    font-size: 15px;
+  }
+
+
+  /* 메모 */
+
+  .outline-memo {
+    padding-right: 15px;
+  }
+
+  .memo-editor,
+  .memo-display {
+    font-size: 14px;
+  }
+
+
+  /* 토글 */
+
+  .outline-toggle {
+    width: 26px;
+    height: 26px;
+
+    font-size: 20px;
+  }
+
+
+  /* 모두 열기/닫기 */
+
+  .outline-controls {
+    margin-bottom: 10px;
+  }
+
+  .outline-controls button {
+    padding:
+      6px
+      9px;
+
+    font-size: 11px;
+  }
+
+}
+
+
+/* =========================================================
+   아주 작은 화면
+========================================================= */
+
+@media (max-width: 420px) {
+
+  .app {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .outline-children {
+    margin-left: 12px;
+  }
+
+  .outline-row {
+    grid-template-columns:
+      32px
+      minmax(0, 1fr)
+      27px;
+  }
+
+  .outline-level-0 > .outline-row {
+    font-size: 17px;
+  }
+
+  .outline-level-1 > .outline-row {
+    font-size: 16px;
+  }
+
+  .outline-level-2 > .outline-row {
+    font-size: 15px;
+  }
+
+  .outline-level-3 > .outline-row {
+    font-size: 14px;
+  }
+
+    .backup-section {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 14px;
+
+    margin-top: 32px;
+  }
+
+  .backup-actions {
+    width: 100%;
+  }
+
+  .backup-button,
+  .restore-button {
+    flex: 1;
+  }
+
+}
