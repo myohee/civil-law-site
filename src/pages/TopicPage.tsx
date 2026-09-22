@@ -70,11 +70,21 @@ function MemoEditor({
   const textareaRef =
     useRef<HTMLTextAreaElement>(null);
 
-  /* =========================
-     기본 설정
-  ========================= */
+  /*
+    iPad / 한글 IME 대응
+
+    compositionstart ~ compositionend 동안에는
+    Enter / Tab 자동처리를 하지 않음
+  */
+  const isComposingRef =
+    useRef(false);
 
   const INDENT = "    ";
+
+
+  /* =========================
+     textarea 높이 자동 조절
+  ========================= */
 
   const resizeTextarea = () => {
     const textarea =
@@ -91,14 +101,21 @@ function MemoEditor({
       )}px`;
   };
 
+
   useEffect(() => {
     resizeTextarea();
+
     textareaRef.current?.focus();
   }, []);
 
 
+  useEffect(() => {
+    resizeTextarea();
+  }, [value]);
+
+
   /* =========================
-     커서 위치 변경
+     커서 이동
   ========================= */
 
   const moveCursor = (
@@ -118,37 +135,54 @@ function MemoEditor({
 
 
   /* =========================
-     현재 줄 분석
+     현재 줄 가져오기
+
+     중요:
+     React의 value가 아니라
+     textarea.value를 사용
+
+     → iPad에서 최신 입력값 기준
   ========================= */
 
   const getCurrentLine = (
     textarea: HTMLTextAreaElement
   ) => {
+    const currentValue =
+      textarea.value;
+
     const start =
       textarea.selectionStart;
 
+    const end =
+      textarea.selectionEnd;
+
     const beforeCursor =
-      value.slice(0, start);
+      currentValue.slice(0, start);
 
     const lineStart =
       beforeCursor.lastIndexOf("\n") + 1;
 
     const nextLineBreak =
-      value.indexOf("\n", start);
+      currentValue.indexOf(
+        "\n",
+        start
+      );
 
     const lineEnd =
       nextLineBreak === -1
-        ? value.length
+        ? currentValue.length
         : nextLineBreak;
 
     const line =
-      value.slice(
+      currentValue.slice(
         lineStart,
         lineEnd
       );
 
     return {
+      currentValue,
       start,
+      end,
       lineStart,
       lineEnd,
       line,
@@ -157,13 +191,7 @@ function MemoEditor({
 
 
   /* =========================
-     한 줄의 목록 형식 분석
-
-     지원:
-     1.
-     (1)
-     1)
-     -
+     현재 줄의 목록 형식 분석
   ========================= */
 
   const parseLine = (
@@ -257,12 +285,7 @@ function MemoEditor({
 
 
   /* =========================
-     Enter
-
-     1. → 2.
-     (1) → (2)
-     1) → 2)
-     - → -
+     Enter 처리
   ========================= */
 
   const handleEnter = (
@@ -272,65 +295,81 @@ function MemoEditor({
     const textarea =
       event.currentTarget;
 
+
+    /*
+      ★ iPad / 한글 입력 핵심
+
+      글자가 아직 조합 중이면
+      Enter를 절대 가로채지 않음.
+    */
+
+    if (
+      isComposingRef.current ||
+      event.nativeEvent.isComposing
+    ) {
+      return;
+    }
+
+
     const {
+      currentValue,
       start,
+      end,
       lineStart,
       line,
     } =
       getCurrentLine(textarea);
+
 
     const parsed =
       parseLine(line);
 
 
     /*
-      일반 문장이면
-      브라우저 기본 Enter
+      목록이 아닌 일반 문장은
+      기본 Enter 사용
     */
 
     if (!parsed) {
       return;
     }
 
+
     event.preventDefault();
 
 
-    /*
-      -------------------------
-      내용 없는 목록에서 Enter
+    /* =========================
+       빈 목록에서 Enter
 
-      3. |
-      (3) |
-      3) |
-      - |
+       3. |
+       (3) |
+       3) |
+       - |
 
-      → 목록 종료
-      -------------------------
-    */
+       → 목록 종료
+    ========================= */
 
     if (
       parsed.content.trim() === ""
     ) {
       const beforeLine =
-        value.slice(
+        currentValue.slice(
           0,
           lineStart
         );
 
       const afterCursor =
-        value.slice(start);
+        currentValue.slice(end);
 
-      /*
-        목록 기호는 없애되
-        현재 들여쓰기는 유지
-      */
 
       const newValue =
         beforeLine +
         parsed.indent +
         afterCursor;
 
+
       onChange(newValue);
+
 
       moveCursor(
         textarea,
@@ -338,15 +377,14 @@ function MemoEditor({
           parsed.indent.length
       );
 
+
       return;
     }
 
 
-    /*
-      -------------------------
-      다음 목록 만들기
-      -------------------------
-    */
+    /* =========================
+       다음 목록 번호
+    ========================= */
 
     let nextPrefix = "";
 
@@ -392,15 +430,15 @@ function MemoEditor({
     const insertion =
       `\n${nextPrefix}`;
 
-    const selectionEnd =
-      textarea.selectionEnd;
 
     const newValue =
-      value.slice(0, start) +
+      currentValue.slice(0, start) +
       insertion +
-      value.slice(selectionEnd);
+      currentValue.slice(end);
+
 
     onChange(newValue);
+
 
     moveCursor(
       textarea,
@@ -411,11 +449,7 @@ function MemoEditor({
 
 
   /* =========================
-     Tab
-
-     1. → (1) → 1)
-
-     Shift + Tab은 반대
+     Tab / Shift + Tab
   ========================= */
 
   const handleTab = (
@@ -425,26 +459,39 @@ function MemoEditor({
     const textarea =
       event.currentTarget;
 
+
+    /*
+      한글 조합 중에는
+      Tab 로직 실행하지 않음
+    */
+
+    if (
+      isComposingRef.current ||
+      event.nativeEvent.isComposing
+    ) {
+      return;
+    }
+
+
     const {
+      currentValue,
       lineStart,
       lineEnd,
       line,
     } =
       getCurrentLine(textarea);
 
+
     const parsed =
       parseLine(line);
+
 
     event.preventDefault();
 
 
-    /*
-      =========================
-      목록 형식이 아닌 일반 문장
-
-      → 그냥 들여쓰기
-    =========================
-    */
+    /* =========================
+       일반 문장
+    ========================= */
 
     if (!parsed) {
       const start =
@@ -456,43 +503,27 @@ function MemoEditor({
 
       /*
         Shift + Tab
-        앞에 공백이 있으면 제거
       */
 
       if (event.shiftKey) {
-        const before =
-          value.slice(
-            0,
-            lineStart
-          );
-
         const currentLine =
-          value.slice(
+          currentValue.slice(
             lineStart,
             lineEnd
           );
 
-        let removeCount = 0;
+        const spaces =
+          currentLine.match(
+            /^ +/
+          )?.[0].length ?? 0;
 
-        if (
-          currentLine.startsWith(
-            INDENT
-          )
-        ) {
-          removeCount =
-            INDENT.length;
-        } else {
-          const spaces =
-            currentLine.match(
-              /^ +/
-            )?.[0].length ?? 0;
 
-          removeCount =
-            Math.min(
-              spaces,
-              INDENT.length
-            );
-        }
+        const removeCount =
+          Math.min(
+            spaces,
+            INDENT.length
+          );
+
 
         if (
           removeCount === 0
@@ -500,50 +531,63 @@ function MemoEditor({
           return;
         }
 
+
         const newLine =
           currentLine.slice(
             removeCount
           );
 
+
         const newValue =
-          before +
+          currentValue.slice(
+            0,
+            lineStart
+          ) +
           newLine +
-          value.slice(lineEnd);
+          currentValue.slice(
+            lineEnd
+          );
+
 
         onChange(newValue);
+
 
         moveCursor(
           textarea,
           Math.max(
             lineStart,
-            start - removeCount
+            start -
+              removeCount
           )
         );
+
 
         return;
       }
 
 
       /*
-        일반 문장에서 Tab
-        → 공백 4칸
+        일반 문장 + Tab
       */
 
-      const insertion =
-        INDENT;
-
       const newValue =
-        value.slice(0, start) +
-        insertion +
-        value.slice(end);
+        currentValue.slice(
+          0,
+          start
+        ) +
+        INDENT +
+        currentValue.slice(end);
+
 
       onChange(newValue);
+
 
       moveCursor(
         textarea,
         start +
-          insertion.length
+          INDENT.length
       );
+
 
       return;
     }
@@ -552,10 +596,7 @@ function MemoEditor({
     /* =========================
        - 목록
 
-       - 는 숫자 계층과 별개
-
-       Tab → 들여쓰기
-       Shift+Tab → 내어쓰기
+       - 는 번호 계층과 별개
     ========================= */
 
     if (
@@ -564,6 +605,7 @@ function MemoEditor({
       let newIndent =
         parsed.indent;
 
+
       if (event.shiftKey) {
 
         if (
@@ -571,6 +613,7 @@ function MemoEditor({
         ) {
           return;
         }
+
 
         newIndent =
           newIndent.slice(
@@ -594,13 +637,21 @@ function MemoEditor({
           parsed.content
         }`;
 
+
       const newValue =
-        value.slice(
+        currentValue.slice(
           0,
           lineStart
         ) +
         newLine +
-        value.slice(lineEnd);
+        currentValue.slice(
+          lineEnd
+        );
+
+
+      const oldPosition =
+        textarea.selectionStart;
+
 
       onChange(newValue);
 
@@ -609,8 +660,6 @@ function MemoEditor({
         newLine.length -
         line.length;
 
-      const oldPosition =
-        textarea.selectionStart;
 
       moveCursor(
         textarea,
@@ -621,34 +670,27 @@ function MemoEditor({
         )
       );
 
+
       return;
     }
 
 
     /* =========================
-       숫자 목록
+       번호 목록
 
-       Tab:
+       Tab
        1. → (1) → 1)
 
-       Shift+Tab:
+       Shift + Tab
        1) → (1) → 1.
     ========================= */
 
     let newLine = "";
 
 
-    /*
-      -------------------------
-      Tab
-      -------------------------
-    */
+    /* ---------- Tab ---------- */
 
     if (!event.shiftKey) {
-
-      /*
-        1. → (1)
-      */
 
       if (
         parsed.type === "level1"
@@ -659,10 +701,6 @@ function MemoEditor({
       }
 
 
-      /*
-        (1) → 1)
-      */
-
       else if (
         parsed.type === "level2"
       ) {
@@ -671,13 +709,6 @@ function MemoEditor({
           `1) ${parsed.content}`;
       }
 
-
-      /*
-        이미 1) 단계
-
-        → 더 깊은 숫자 단계는 없으므로
-          공백만 한 단계 추가
-      */
 
       else if (
         parsed.type === "level3"
@@ -691,17 +722,9 @@ function MemoEditor({
     }
 
 
-    /*
-      -------------------------
-      Shift + Tab
-      -------------------------
-    */
+    /* ------- Shift Tab ------- */
 
     else {
-
-      /*
-        1) → (1)
-      */
 
       if (
         parsed.type === "level3"
@@ -715,15 +738,12 @@ function MemoEditor({
               )
             : "";
 
+
         newLine =
           `${newIndent}(1) ` +
           parsed.content;
       }
 
-
-      /*
-        (1) → 1.
-      */
 
       else if (
         parsed.type === "level2"
@@ -737,26 +757,23 @@ function MemoEditor({
               )
             : "";
 
+
         newLine =
           `${newIndent}1. ` +
           parsed.content;
       }
 
 
-      /*
-        1. 단계에서는
-        형식은 유지하고
-        들여쓰기만 제거
-      */
-
       else if (
         parsed.type === "level1"
       ) {
+
         if (
           parsed.indent.length === 0
         ) {
           return;
         }
+
 
         const newIndent =
           parsed.indent.length >=
@@ -766,6 +783,7 @@ function MemoEditor({
                 -INDENT.length
               )
             : "";
+
 
         newLine =
           `${newIndent}${
@@ -788,29 +806,30 @@ function MemoEditor({
     const oldCursorPosition =
       textarea.selectionStart;
 
+
     const cursorOffset =
       oldCursorPosition -
       lineStart;
 
+
     const newValue =
-      value.slice(
+      currentValue.slice(
         0,
         lineStart
       ) +
       newLine +
-      value.slice(lineEnd);
+      currentValue.slice(
+        lineEnd
+      );
+
 
     onChange(newValue);
 
 
-    /*
-      제목 내용에서의 커서 위치를
-      최대한 유지
-    */
-
     const lengthDifference =
       newLine.length -
       line.length;
+
 
     const newCursorPosition =
       lineStart +
@@ -820,6 +839,7 @@ function MemoEditor({
           lengthDifference
       );
 
+
     moveCursor(
       textarea,
       newCursorPosition
@@ -828,18 +848,31 @@ function MemoEditor({
 
 
   /* =========================
-     키보드 처리
+     Keyboard
   ========================= */
 
   const handleKeyDown = (
     event:
       React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
+    /*
+      ★ 조합 중인 키 입력은
+      자동목록 로직에서 제외
+    */
+
+    if (
+      isComposingRef.current ||
+      event.nativeEvent.isComposing
+    ) {
+      return;
+    }
+
 
     if (event.key === "Tab") {
       handleTab(event);
       return;
     }
+
 
     if (event.key === "Enter") {
       handleEnter(event);
@@ -854,19 +887,65 @@ function MemoEditor({
   return (
     <textarea
       ref={textareaRef}
+
       className="memo-editor"
+
       value={value}
+
       rows={1}
+
       placeholder="내용을 입력하세요..."
+
+
+      /* =====================
+         한글 IME 조합 상태
+      ===================== */
+
+      onCompositionStart={() => {
+        isComposingRef.current =
+          true;
+      }}
+
+      onCompositionEnd={(
+        event
+      ) => {
+        isComposingRef.current =
+          false;
+
+
+        /*
+          조합이 끝난 순간의
+          실제 textarea 값을 저장
+
+          iPad Safari에서
+          React value가 한 박자 늦는 현상 방지
+        */
+
+        onChange(
+          event.currentTarget.value
+        );
+
+
+        requestAnimationFrame(
+          resizeTextarea
+        );
+      }}
+
 
       onKeyDown={
         handleKeyDown
       }
 
+
       onChange={(event) => {
+        /*
+          실제 DOM의 최신 값을 그대로 저장
+        */
+
         onChange(
-          event.target.value
+          event.currentTarget.value
         );
+
 
         requestAnimationFrame(
           resizeTextarea
