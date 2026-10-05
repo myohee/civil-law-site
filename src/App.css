@@ -386,6 +386,31 @@ button {
   color: #333;
 }
 
+/* =========================================================
+   조문
+========================================================= */
+
+.article-box {
+  margin: 10px 0;
+  padding: 14px 16px;
+  border: 1px solid #e1e1dc;
+  border-radius: 8px;
+  background: #fafaf7;
+}
+
+.article-title {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 650;
+  color: #333;
+}
+
+.article-content {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #555;
+  white-space: pre-wrap;
+}
 
 /* =========================================================
    목차 전체
