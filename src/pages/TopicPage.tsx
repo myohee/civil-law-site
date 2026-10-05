@@ -271,7 +271,12 @@ function MemoEditor({
   useEffect(() => {
     resizeTextarea();
 
-    textareaRef.current?.focus();
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.focus({
+      preventScroll: true,
+    });
   }, []);
 
 
@@ -530,7 +535,7 @@ function MemoEditor({
       moveCursor(
         textarea,
         beforeLine.length +
-          parsed.indent.length
+        parsed.indent.length
       );
 
       return;
@@ -548,8 +553,7 @@ function MemoEditor({
       parsed.type === "level1"
     ) {
       nextPrefix =
-        `${parsed.indent}${
-          parsed.number! + 1
+        `${parsed.indent}${parsed.number! + 1
         }. `;
     }
 
@@ -558,8 +562,7 @@ function MemoEditor({
       parsed.type === "level2"
     ) {
       nextPrefix =
-        `${parsed.indent}(${
-          parsed.number! + 1
+        `${parsed.indent}(${parsed.number! + 1
         }) `;
     }
 
@@ -568,8 +571,7 @@ function MemoEditor({
       parsed.type === "level3"
     ) {
       nextPrefix =
-        `${parsed.indent}${
-          parsed.number! + 1
+        `${parsed.indent}${parsed.number! + 1
         }) `;
     }
 
@@ -601,7 +603,7 @@ function MemoEditor({
     moveCursor(
       textarea,
       start +
-        insertion.length
+      insertion.length
     );
   };
 
@@ -706,7 +708,7 @@ function MemoEditor({
           Math.max(
             lineStart,
             start -
-              removeCount
+            removeCount
           )
         );
 
@@ -729,7 +731,7 @@ function MemoEditor({
       moveCursor(
         textarea,
         start +
-          INDENT.length
+        INDENT.length
       );
 
       return;
@@ -760,7 +762,7 @@ function MemoEditor({
             Math.max(
               0,
               newIndent.length -
-                INDENT.length
+              INDENT.length
             )
           );
       } else {
@@ -769,8 +771,7 @@ function MemoEditor({
 
 
       const newLine =
-        `${newIndent}- ${
-          parsed.content
+        `${newIndent}- ${parsed.content
         }`;
 
 
@@ -802,7 +803,7 @@ function MemoEditor({
         Math.max(
           lineStart,
           oldPosition +
-            difference
+          difference
         )
       );
 
@@ -862,11 +863,11 @@ function MemoEditor({
       ) {
         const newIndent =
           parsed.indent.length >=
-          INDENT.length
+            INDENT.length
             ? parsed.indent.slice(
-                0,
-                -INDENT.length
-              )
+              0,
+              -INDENT.length
+            )
             : "";
 
         newLine =
@@ -879,11 +880,11 @@ function MemoEditor({
       ) {
         const newIndent =
           parsed.indent.length >=
-          INDENT.length
+            INDENT.length
             ? parsed.indent.slice(
-                0,
-                -INDENT.length
-              )
+              0,
+              -INDENT.length
+            )
             : "";
 
         newLine =
@@ -902,16 +903,15 @@ function MemoEditor({
 
         const newIndent =
           parsed.indent.length >=
-          INDENT.length
+            INDENT.length
             ? parsed.indent.slice(
-                0,
-                -INDENT.length
-              )
+              0,
+              -INDENT.length
+            )
             : "";
 
         newLine =
-          `${newIndent}${
-            parsed.number
+          `${newIndent}${parsed.number
           }. ${parsed.content}`;
       }
     }
@@ -953,7 +953,7 @@ function MemoEditor({
       Math.max(
         0,
         cursorOffset +
-          lengthDifference
+        lengthDifference
       );
 
 
@@ -1134,10 +1134,9 @@ function OutlineItem({
             <button
               type="button"
               className={
-                `outline-toggle ${
-                  isOpen
-                    ? "open"
-                    : ""
+                `outline-toggle ${isOpen
+                  ? "open"
+                  : ""
                 }`
               }
               onClick={() =>
@@ -1290,13 +1289,13 @@ function TopicPage() {
 
   const part =
     civilData.parts[
-      partNumber
+    partNumber
     ];
 
 
   const topic =
     part?.topics[
-      topicNumber
+    topicNumber
     ];
 
 
@@ -1483,7 +1482,7 @@ function TopicPage() {
           Boolean(
             node.children &&
             node.children.length >
-              0
+            0
           );
 
 
@@ -1509,7 +1508,7 @@ function TopicPage() {
         if (
           node.children &&
           node.children.length >
-            0
+          0
         ) {
           paths.push(
             ...collectExpandablePaths(
@@ -1626,7 +1625,7 @@ function TopicPage() {
         <h1>
           {topic.title}
         </h1>
-{/* 
+        {/* 
         {topic.note && (
           <p className="topic-note">
             {topic.note}
@@ -1659,7 +1658,7 @@ function TopicPage() {
       <section className="outline-container">
 
         {topic.children &&
-        topic.children.length >
+          topic.children.length >
           0 ? (
           topic.children.map(
             (
