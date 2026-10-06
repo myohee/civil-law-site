@@ -269,15 +269,8 @@ function MemoEditor({
 
 
   useEffect(() => {
-    resizeTextarea();
-
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    textarea.focus({
-      preventScroll: true,
-    });
-  }, []);
+  resizeTextarea();
+}, []);
 
 
   useEffect(() => {
@@ -1435,27 +1428,34 @@ function TopicPage() {
   ======================================================= */
 
   const toggleMemo = (
-    path: string
-  ) => {
-    setEditingMemos(
-      (previous) => {
-        const next =
-          new Set(previous);
+  path: string
+) => {
+  const scrollY = window.scrollY;
 
+  setEditingMemos(
+    (previous) => {
+      const next =
+        new Set(previous);
 
-        if (
-          next.has(path)
-        ) {
-          next.delete(path);
-        } else {
-          next.add(path);
-        }
-
-
-        return next;
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
       }
-    );
-  };
+
+      return next;
+    }
+  );
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo({
+        top: scrollY,
+        behavior: "instant",
+      });
+    });
+  });
+};
 
 
   /* =======================================================
