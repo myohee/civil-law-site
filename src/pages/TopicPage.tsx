@@ -34,17 +34,30 @@ type OutlineItemProps = {
 
   toggleOpen: (path: string) => void;
   toggleMemo: (path: string) => void;
-  updateMemo: (path: string, value: string) => void;
+
+  saveMemoDirectly: (
+    path: string,
+    value: string
+  ) => void;
+
+  syncMemo: (
+    path: string,
+    value: string
+  ) => void;
 };
 
-const articles = civilArticles as Record<string, Article>;
+const articles =
+  civilArticles as Record<string, Article>;
 
 
 /* =========================================================
    목차 번호
 ========================================================= */
 
-function getNumber(level: number, index: number) {
+function getNumber(
+  level: number,
+  index: number
+) {
   const number = index + 1;
 
   if (level === 0) {
@@ -83,7 +96,10 @@ function getNumber(level: number, index: number) {
       "⑳",
     ];
 
-    return circledNumbers[index] ?? `${number}`;
+    return (
+      circledNumbers[index] ??
+      `${number}`
+    );
   }
 
   return "";
@@ -92,37 +108,58 @@ function getNumber(level: number, index: number) {
 
 /* =========================================================
    메모 표시
-   @245 → 민법 제245조 표시
-   @245의2 → 가지조문도 가능
+
+   @245
+   @245의2
+
+   → 조문으로 변환
 ========================================================= */
 
-function MemoDisplay({ text }: { text: string }) {
+function MemoDisplay({
+  text,
+}: {
+  text: string;
+}) {
   const lines = text.split("\n");
 
   return (
     <div className="memo-display">
       {lines.map((line, index) => {
-        const match = line
-          .trim()
-          .match(/^@(\d+(?:의\d+)?)$/);
+        const match =
+          line
+            .trim()
+            .match(
+              /^@(\d+(?:의\d+)?)$/
+            );
 
         if (match) {
-          const articleNumber = match[1];
-          const article = articles[articleNumber];
+          const articleNumber =
+            match[1];
+
+          const article =
+            articles[articleNumber];
 
           if (!article) {
             return (
-              <div key={index} className="memo-line">
+              <div
+                key={index}
+                className="memo-line"
+              >
                 {line}
               </div>
             );
           }
 
           return (
-            <div className="article-box" key={index}>
+            <div
+              key={index}
+              className="article-box"
+            >
               <div className="article-title">
                 제{articleNumber}조
-                {article.title ? ` (${article.title})` : ""}
+                {article.title
+                  ? ` (${article.title})`
+                  : ""}
               </div>
 
               <div className="article-content">
@@ -133,7 +170,10 @@ function MemoDisplay({ text }: { text: string }) {
         }
 
         return (
-          <div key={index} className="memo-line">
+          <div
+            key={index}
+            className="memo-line"
+          >
             {line || "\u00A0"}
           </div>
         );
@@ -145,32 +185,85 @@ function MemoDisplay({ text }: { text: string }) {
 
 /* =========================================================
    MemoEditor
+
+   중요:
+   uncontrolled textarea 사용
+
+   입력 중 React state를 변경하지 않아서
+   iPad Safari에서 페이지 전체가
+   매 글자마다 재렌더링되는 것을 방지
 ========================================================= */
 
 type MemoEditorProps = {
-  value: string;
-  onChange: (value: string) => void;
+  initialValue: string;
+
+  onSaveDirectly: (
+    value: string
+  ) => void;
+
+  onSync: (
+    value: string
+  ) => void;
 };
 
+
 function MemoEditor({
-  value,
-  onChange,
+  initialValue,
+  onSaveDirectly,
+  onSync,
 }: MemoEditorProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const isComposingRef = useRef(false);
+  const textareaRef =
+    useRef<HTMLTextAreaElement>(null);
+
+  const isComposingRef =
+    useRef(false);
 
   const INDENT = "    ";
 
 
   /* =======================================================
-     textarea 높이 조절
+     최초 높이 설정
 
-     중요:
-     height를 매번 auto로 바꾸지 않음.
-     실제로 높이가 부족할 때만 늘림.
+     입력할 때마다 height를 재계산하지 않습니다.
+     메모를 처음 열었을 때만 기존 내용에 맞춤.
   ======================================================= */
 
-  const growTextarea = (
+  useEffect(() => {
+    const textarea =
+      textareaRef.current;
+
+    if (!textarea) return;
+
+    textarea.style.height =
+      `${Math.max(
+        textarea.scrollHeight,
+        44
+      )}px`;
+  }, []);
+
+
+  /* =======================================================
+     localStorage 저장
+
+     React state는 건드리지 않음
+  ======================================================= */
+
+  const saveCurrentValue = (
+    textarea: HTMLTextAreaElement
+  ) => {
+    onSaveDirectly(
+      textarea.value
+    );
+  };
+
+
+  /* =======================================================
+     필요한 경우에만 아래쪽으로 높이 증가
+
+     height = auto를 사용하지 않음
+  ======================================================= */
+
+  const growIfNeeded = (
     textarea: HTMLTextAreaElement
   ) => {
     const currentHeight =
@@ -179,32 +272,14 @@ function MemoEditor({
     const requiredHeight =
       textarea.scrollHeight;
 
-    if (requiredHeight > currentHeight + 1) {
+    if (
+      requiredHeight >
+      currentHeight + 1
+    ) {
       textarea.style.height =
         `${requiredHeight}px`;
     }
   };
-
-
-  /*
-    처음 메모를 열었을 때만
-    저장된 내용에 맞춰 높이를 계산
-  */
-
-  useEffect(() => {
-    const textarea = textareaRef.current;
-
-    if (!textarea) return;
-
-    const requiredHeight =
-      Math.max(
-        textarea.scrollHeight,
-        44
-      );
-
-    textarea.style.height =
-      `${requiredHeight}px`;
-  }, []);
 
 
   /* =======================================================
@@ -216,10 +291,13 @@ function MemoEditor({
     position: number
   ) => {
     requestAnimationFrame(() => {
-      textarea.selectionStart = position;
-      textarea.selectionEnd = position;
+      textarea.selectionStart =
+        position;
 
-      growTextarea(textarea);
+      textarea.selectionEnd =
+        position;
+
+      growIfNeeded(textarea);
     });
   };
 
@@ -231,19 +309,31 @@ function MemoEditor({
   const getCurrentLine = (
     textarea: HTMLTextAreaElement
   ) => {
-    const currentValue = textarea.value;
+    const currentValue =
+      textarea.value;
 
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
+    const start =
+      textarea.selectionStart;
+
+    const end =
+      textarea.selectionEnd;
 
     const beforeCursor =
-      currentValue.slice(0, start);
+      currentValue.slice(
+        0,
+        start
+      );
 
     const lineStart =
-      beforeCursor.lastIndexOf("\n") + 1;
+      beforeCursor.lastIndexOf(
+        "\n"
+      ) + 1;
 
     const nextLineBreak =
-      currentValue.indexOf("\n", start);
+      currentValue.indexOf(
+        "\n",
+        start
+      );
 
     const lineEnd =
       nextLineBreak === -1
@@ -267,59 +357,92 @@ function MemoEditor({
   };
 
 
-  /* =========================================================
-     목록 형식 분석
-  ========================================================= */
+  /* =======================================================
+     목록 분석
+  ======================================================= */
 
-  const parseLine = (line: string) => {
+  const parseLine = (
+    line: string
+  ) => {
+    /*
+      1.
+    */
+
     const level1 =
-      line.match(/^(\s*)(\d+)\.\s?(.*)$/);
+      line.match(
+        /^(\s*)(\d+)\.\s?(.*)$/
+      );
 
     if (level1) {
       return {
         type: "level1" as const,
         indent: level1[1],
-        number: Number(level1[2]),
-        content: level1[3],
+        number:
+          Number(level1[2]),
+        content:
+          level1[3],
       };
     }
 
 
+    /*
+      (1)
+    */
+
     const level2 =
-      line.match(/^(\s*)\((\d+)\)\s?(.*)$/);
+      line.match(
+        /^(\s*)\((\d+)\)\s?(.*)$/
+      );
 
     if (level2) {
       return {
         type: "level2" as const,
         indent: level2[1],
-        number: Number(level2[2]),
-        content: level2[3],
+        number:
+          Number(level2[2]),
+        content:
+          level2[3],
       };
     }
 
 
+    /*
+      1)
+    */
+
     const level3 =
-      line.match(/^(\s*)(\d+)\)\s?(.*)$/);
+      line.match(
+        /^(\s*)(\d+)\)\s?(.*)$/
+      );
 
     if (level3) {
       return {
         type: "level3" as const,
         indent: level3[1],
-        number: Number(level3[2]),
-        content: level3[3],
+        number:
+          Number(level3[2]),
+        content:
+          level3[3],
       };
     }
 
 
+    /*
+      -
+    */
+
     const bullet =
-      line.match(/^(\s*)-\s?(.*)$/);
+      line.match(
+        /^(\s*)-\s?(.*)$/
+      );
 
     if (bullet) {
       return {
         type: "bullet" as const,
         indent: bullet[1],
         number: null,
-        content: bullet[2],
+        content:
+          bullet[2],
       };
     }
 
@@ -327,14 +450,51 @@ function MemoEditor({
   };
 
 
-  /* =========================================================
+  /* =======================================================
+     textarea 값을 직접 변경
+
+     React state를 거치지 않음
+  ======================================================= */
+
+  const replaceValue = (
+    textarea: HTMLTextAreaElement,
+    newValue: string,
+    newCursorPosition: number
+  ) => {
+    textarea.value =
+      newValue;
+
+    /*
+      localStorage에는 즉시 저장
+    */
+
+    saveCurrentValue(
+      textarea
+    );
+
+    moveCursor(
+      textarea,
+      newCursorPosition
+    );
+  };
+
+
+  /* =======================================================
      Enter
-  ========================================================= */
+  ======================================================= */
 
   const handleEnter = (
-    event: React.KeyboardEvent<HTMLTextAreaElement>
+    event:
+      React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
-    const textarea = event.currentTarget;
+    const textarea =
+      event.currentTarget;
+
+
+    /*
+      한글 조합 중에는
+      기본 Enter 동작 사용
+    */
 
     if (
       isComposingRef.current ||
@@ -350,28 +510,36 @@ function MemoEditor({
       end,
       lineStart,
       line,
-    } = getCurrentLine(textarea);
+    } =
+      getCurrentLine(
+        textarea
+      );
 
 
-    const parsed = parseLine(line);
+    const parsed =
+      parseLine(line);
+
 
     /*
-      목록 형식이 아니면
-      Safari 기본 Enter 사용
+      일반 문장은
+      기본 Enter
     */
 
     if (!parsed) {
       return;
     }
 
+
     event.preventDefault();
 
 
     /* =====================================================
-       빈 목록에서 Enter → 목록 종료
+       빈 목록 → 목록 종료
     ===================================================== */
 
-    if (parsed.content.trim() === "") {
+    if (
+      parsed.content.trim() === ""
+    ) {
       const beforeLine =
         currentValue.slice(
           0,
@@ -379,19 +547,23 @@ function MemoEditor({
         );
 
       const afterCursor =
-        currentValue.slice(end);
+        currentValue.slice(
+          end
+        );
 
       const newValue =
         beforeLine +
         parsed.indent +
         afterCursor;
 
-      onChange(newValue);
-
-      moveCursor(
-        textarea,
+      const newCursorPosition =
         beforeLine.length +
-          parsed.indent.length
+        parsed.indent.length;
+
+      replaceValue(
+        textarea,
+        newValue,
+        newCursorPosition
       );
 
       return;
@@ -404,22 +576,34 @@ function MemoEditor({
 
     let nextPrefix = "";
 
-    if (parsed.type === "level1") {
+
+    if (
+      parsed.type === "level1"
+    ) {
       nextPrefix =
         `${parsed.indent}${parsed.number! + 1}. `;
     }
 
-    if (parsed.type === "level2") {
+
+    if (
+      parsed.type === "level2"
+    ) {
       nextPrefix =
         `${parsed.indent}(${parsed.number! + 1}) `;
     }
 
-    if (parsed.type === "level3") {
+
+    if (
+      parsed.type === "level3"
+    ) {
       nextPrefix =
         `${parsed.indent}${parsed.number! + 1}) `;
     }
 
-    if (parsed.type === "bullet") {
+
+    if (
+      parsed.type === "bullet"
+    ) {
       nextPrefix =
         `${parsed.indent}- `;
     }
@@ -428,28 +612,38 @@ function MemoEditor({
     const insertion =
       `\n${nextPrefix}`;
 
+
     const newValue =
-      currentValue.slice(0, start) +
+      currentValue.slice(
+        0,
+        start
+      ) +
       insertion +
-      currentValue.slice(end);
+      currentValue.slice(
+        end
+      );
 
-    onChange(newValue);
 
-    moveCursor(
+    replaceValue(
       textarea,
-      start + insertion.length
+      newValue,
+      start +
+        insertion.length
     );
   };
 
 
-  /* =========================================================
+  /* =======================================================
      Tab
-  ========================================================= */
+  ======================================================= */
 
   const handleTab = (
-    event: React.KeyboardEvent<HTMLTextAreaElement>
+    event:
+      React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
-    const textarea = event.currentTarget;
+    const textarea =
+      event.currentTarget;
+
 
     if (
       isComposingRef.current ||
@@ -464,9 +658,15 @@ function MemoEditor({
       lineStart,
       lineEnd,
       line,
-    } = getCurrentLine(textarea);
+    } =
+      getCurrentLine(
+        textarea
+      );
 
-    const parsed = parseLine(line);
+
+    const parsed =
+      parseLine(line);
+
 
     event.preventDefault();
 
@@ -483,6 +683,10 @@ function MemoEditor({
         textarea.selectionEnd;
 
 
+      /*
+        Shift + Tab
+      */
+
       if (event.shiftKey) {
         const currentLine =
           currentValue.slice(
@@ -491,7 +695,9 @@ function MemoEditor({
           );
 
         const spaces =
-          currentLine.match(/^ +/)?.[0].length ?? 0;
+          currentLine.match(
+            /^ +/
+          )?.[0].length ?? 0;
 
         const removeCount =
           Math.min(
@@ -499,14 +705,18 @@ function MemoEditor({
             INDENT.length
           );
 
-        if (removeCount === 0) {
+        if (
+          removeCount === 0
+        ) {
           return;
         }
+
 
         const newLine =
           currentLine.slice(
             removeCount
           );
+
 
         const newValue =
           currentValue.slice(
@@ -518,13 +728,14 @@ function MemoEditor({
             lineEnd
           );
 
-        onChange(newValue);
 
-        moveCursor(
+        replaceValue(
           textarea,
+          newValue,
           Math.max(
             lineStart,
-            start - removeCount
+            start -
+              removeCount
           )
         );
 
@@ -532,16 +743,26 @@ function MemoEditor({
       }
 
 
+      /*
+        일반 Tab
+      */
+
       const newValue =
-        currentValue.slice(0, start) +
+        currentValue.slice(
+          0,
+          start
+        ) +
         INDENT +
-        currentValue.slice(end);
+        currentValue.slice(
+          end
+        );
 
-      onChange(newValue);
 
-      moveCursor(
+      replaceValue(
         textarea,
-        start + INDENT.length
+        newValue,
+        start +
+          INDENT.length
       );
 
       return;
@@ -552,12 +773,17 @@ function MemoEditor({
        - 목록
     ===================================================== */
 
-    if (parsed.type === "bullet") {
+    if (
+      parsed.type === "bullet"
+    ) {
       let newIndent =
         parsed.indent;
 
+
       if (event.shiftKey) {
-        if (newIndent.length === 0) {
+        if (
+          newIndent.length === 0
+        ) {
           return;
         }
 
@@ -571,12 +797,14 @@ function MemoEditor({
             )
           );
       } else {
-        newIndent += INDENT;
+        newIndent +=
+          INDENT;
       }
 
 
       const newLine =
         `${newIndent}- ${parsed.content}`;
+
 
       const newValue =
         currentValue.slice(
@@ -588,17 +816,19 @@ function MemoEditor({
           lineEnd
         );
 
+
       const oldPosition =
         textarea.selectionStart;
 
-      onChange(newValue);
 
       const difference =
         newLine.length -
         line.length;
 
-      moveCursor(
+
+      replaceValue(
         textarea,
+        newValue,
         Math.max(
           lineStart,
           oldPosition +
@@ -619,23 +849,30 @@ function MemoEditor({
 
     /*
       Tab
+
       1. → (1) → 1)
     */
 
     if (!event.shiftKey) {
-      if (parsed.type === "level1") {
+      if (
+        parsed.type === "level1"
+      ) {
         newLine =
           `${parsed.indent}${INDENT}` +
           `(1) ${parsed.content}`;
       }
 
-      else if (parsed.type === "level2") {
+      else if (
+        parsed.type === "level2"
+      ) {
         newLine =
           `${parsed.indent}${INDENT}` +
           `1) ${parsed.content}`;
       }
 
-      else if (parsed.type === "level3") {
+      else if (
+        parsed.type === "level3"
+      ) {
         newLine =
           `${parsed.indent}${INDENT}` +
           `${parsed.number}) ${parsed.content}`;
@@ -645,11 +882,14 @@ function MemoEditor({
 
     /*
       Shift + Tab
+
       1) → (1) → 1.
     */
 
     else {
-      if (parsed.type === "level3") {
+      if (
+        parsed.type === "level3"
+      ) {
         const newIndent =
           parsed.indent.length >=
           INDENT.length
@@ -663,7 +903,9 @@ function MemoEditor({
           `${newIndent}(1) ${parsed.content}`;
       }
 
-      else if (parsed.type === "level2") {
+      else if (
+        parsed.type === "level2"
+      ) {
         const newIndent =
           parsed.indent.length >=
           INDENT.length
@@ -677,7 +919,9 @@ function MemoEditor({
           `${newIndent}1. ${parsed.content}`;
       }
 
-      else if (parsed.type === "level1") {
+      else if (
+        parsed.type === "level1"
+      ) {
         if (
           parsed.indent.length === 0
         ) {
@@ -707,9 +951,11 @@ function MemoEditor({
     const oldCursorPosition =
       textarea.selectionStart;
 
+
     const cursorOffset =
       oldCursorPosition -
       lineStart;
+
 
     const newValue =
       currentValue.slice(
@@ -721,12 +967,11 @@ function MemoEditor({
         lineEnd
       );
 
-    onChange(newValue);
-
 
     const lengthDifference =
       newLine.length -
       line.length;
+
 
     const newCursorPosition =
       lineStart +
@@ -736,19 +981,22 @@ function MemoEditor({
           lengthDifference
       );
 
-    moveCursor(
+
+    replaceValue(
       textarea,
+      newValue,
       newCursorPosition
     );
   };
 
 
-  /* =========================================================
-     키보드
-  ========================================================= */
+  /* =======================================================
+     KeyDown
+  ======================================================= */
 
   const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLTextAreaElement>
+    event:
+      React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
     if (
       isComposingRef.current ||
@@ -757,70 +1005,108 @@ function MemoEditor({
       return;
     }
 
-    if (event.key === "Tab") {
+
+    if (
+      event.key === "Tab"
+    ) {
       handleTab(event);
       return;
     }
 
-    if (event.key === "Enter") {
+
+    if (
+      event.key === "Enter"
+    ) {
       handleEnter(event);
     }
   };
 
 
-  /* =========================================================
+  /* =======================================================
      textarea
-  ========================================================= */
+  ======================================================= */
 
   return (
     <textarea
       ref={textareaRef}
+
       className="memo-editor"
 
-      value={value}
+      defaultValue={
+        initialValue
+      }
 
       rows={1}
 
-      placeholder="내용을 입력하세요...  조문은 @245처럼 입력"
+      placeholder={
+        "내용을 입력하세요...  조문은 @245처럼 입력"
+      }
+
+
+      /* =====================
+         한글 조합 시작
+      ===================== */
 
       onCompositionStart={() => {
-        isComposingRef.current = true;
+        isComposingRef.current =
+          true;
       }}
 
-      onCompositionEnd={(event) => {
-        isComposingRef.current = false;
 
-        onChange(
-          event.currentTarget.value
+      /* =====================
+         한글 조합 종료
+
+         localStorage에만 저장
+         React state 변경 X
+      ===================== */
+
+      onCompositionEnd={(
+        event
+      ) => {
+        isComposingRef.current =
+          false;
+
+        saveCurrentValue(
+          event.currentTarget
         );
       }}
 
-      onKeyDown={handleKeyDown}
 
-      onChange={(event) => {
-        /*
-          먼저 현재 DOM textarea를 확보합니다.
-        */
+      onKeyDown={
+        handleKeyDown
+      }
 
+
+      /* =====================
+         일반 입력
+
+         React state 변경 X
+         localStorage만 저장
+      ===================== */
+
+      onInput={(event) => {
         const textarea =
           event.currentTarget;
 
-        /*
-          메모 저장
-        */
+        saveCurrentValue(
+          textarea
+        );
 
-        onChange(textarea.value);
+        growIfNeeded(
+          textarea
+        );
+      }}
 
-        /*
-          기존처럼 매번
-          height = auto
-          를 하지 않습니다.
 
-          실제 내용이 textarea보다
-          길어진 경우에만 높이를 늘립니다.
-        */
+      /* =====================
+         메모칸에서 나갈 때
+         React state와 최종 동기화
+      ===================== */
 
-        growTextarea(textarea);
+      onBlur={(event) => {
+        onSync(
+          event.currentTarget.value
+        );
       }}
     />
   );
@@ -843,7 +1129,9 @@ function OutlineItem({
 
   toggleOpen,
   toggleMemo,
-  updateMemo,
+
+  saveMemoDirectly,
+  syncMemo,
 }: OutlineItemProps) {
   const hasChildren =
     Boolean(
@@ -851,19 +1139,24 @@ function OutlineItem({
       node.children.length > 0
     );
 
+
   const memo =
     memos[path] ?? "";
 
+
   const hasMemo =
     memo.trim().length > 0;
+
 
   const hasExpandableContent =
     hasChildren ||
     hasMemo ||
     Boolean(node.note);
 
+
   const isOpen =
     openItems.has(path);
+
 
   const isEditingMemo =
     editingMemos.has(path);
@@ -873,11 +1166,20 @@ function OutlineItem({
     <div
       className={`outline-level outline-level-${level}`}
     >
+      {/* =====================
+          목차 한 줄
+      ===================== */}
+
       <div className="outline-row">
         <span className="outline-number">
-          {getNumber(level, index)}
+          {getNumber(
+            level,
+            index
+          )}
         </span>
 
+
+        {/* 제목 클릭 → 메모 */}
 
         <button
           type="button"
@@ -890,13 +1192,17 @@ function OutlineItem({
         </button>
 
 
+        {/* > 클릭 → 하위 내용 */}
+
         <div className="outline-action">
           {hasExpandableContent && (
             <button
               type="button"
               className={
                 `outline-toggle ${
-                  isOpen ? "open" : ""
+                  isOpen
+                    ? "open"
+                    : ""
                 }`
               }
               onClick={() =>
@@ -915,14 +1221,30 @@ function OutlineItem({
       </div>
 
 
-      {/* 메모 편집 */}
+      {/* =====================
+          메모 편집
+      ===================== */}
 
       {isEditingMemo && (
         <div className="outline-memo">
           <MemoEditor
-            value={memo}
-            onChange={(value) =>
-              updateMemo(
+            initialValue={
+              memo
+            }
+
+            onSaveDirectly={(
+              value
+            ) =>
+              saveMemoDirectly(
+                path,
+                value
+              )
+            }
+
+            onSync={(
+              value
+            ) =>
+              syncMemo(
                 path,
                 value
               )
@@ -932,10 +1254,14 @@ function OutlineItem({
       )}
 
 
-      {/* 펼친 내용 */}
+      {/* =====================
+          펼친 내용
+      ===================== */}
 
       {isOpen && (
         <div className="outline-expanded-content">
+
+          {/* 저장된 메모 */}
 
           {hasMemo &&
             !isEditingMemo && (
@@ -947,12 +1273,16 @@ function OutlineItem({
             )}
 
 
+          {/* JSON note */}
+
           {node.note && (
             <div className="outline-note">
               {node.note}
             </div>
           )}
 
+
+          {/* 하위 목차 */}
 
           {hasChildren && (
             <div className="outline-children">
@@ -966,11 +1296,25 @@ function OutlineItem({
 
                   return (
                     <OutlineItem
-                      key={childPath}
-                      node={child}
-                      level={level + 1}
-                      index={childIndex}
-                      path={childPath}
+                      key={
+                        childPath
+                      }
+
+                      node={
+                        child
+                      }
+
+                      level={
+                        level + 1
+                      }
+
+                      index={
+                        childIndex
+                      }
+
+                      path={
+                        childPath
+                      }
 
                       openItems={
                         openItems
@@ -980,7 +1324,9 @@ function OutlineItem({
                         editingMemos
                       }
 
-                      memos={memos}
+                      memos={
+                        memos
+                      }
 
                       toggleOpen={
                         toggleOpen
@@ -990,8 +1336,12 @@ function OutlineItem({
                         toggleMemo
                       }
 
-                      updateMemo={
-                        updateMemo
+                      saveMemoDirectly={
+                        saveMemoDirectly
+                      }
+
+                      syncMemo={
+                        syncMemo
                       }
                     />
                   );
@@ -1014,6 +1364,7 @@ function TopicPage() {
   const navigate =
     useNavigate();
 
+
   const {
     partIndex,
     topicIndex,
@@ -1028,41 +1379,70 @@ function TopicPage() {
 
 
   const part =
-    civilData.parts[partNumber];
+    civilData.parts[
+      partNumber
+    ];
+
 
   const topic =
-    part?.topics[topicNumber];
+    part?.topics[
+      topicNumber
+    ];
 
+
+  /* =======================================================
+     localStorage
+  ======================================================= */
 
   const storageKey =
     `civil-memos-${partNumber}-${topicNumber}`;
 
 
+  /* =======================================================
+     State
+  ======================================================= */
+
   const [
     openItems,
     setOpenItems,
-  ] = useState<Set<string>>(
-    new Set()
-  );
+  ] =
+    useState<Set<string>>(
+      new Set()
+    );
 
 
   const [
     editingMemos,
     setEditingMemos,
-  ] = useState<Set<string>>(
-    new Set()
-  );
+  ] =
+    useState<Set<string>>(
+      new Set()
+    );
 
 
   const [
     memos,
     setMemos,
-  ] = useState<MemoMap>({});
+  ] =
+    useState<MemoMap>(
+      {}
+    );
 
 
-  /* =========================================================
-     저장된 메모 불러오기
-  ========================================================= */
+  /*
+    최신 메모 내용을 React render 없이
+    보관하기 위한 ref
+
+    입력 중에는 이것만 변경됩니다.
+  */
+
+  const memosRef =
+    useRef<MemoMap>({});
+
+
+  /* =======================================================
+     메모 불러오기
+  ======================================================= */
 
   useEffect(() => {
     const saved =
@@ -1070,108 +1450,169 @@ function TopicPage() {
         storageKey
       );
 
+
     if (!saved) {
+      memosRef.current =
+        {};
+
       setMemos({});
+
       return;
     }
 
+
     try {
+      const parsed =
+        JSON.parse(saved) as MemoMap;
+
+      memosRef.current =
+        parsed;
+
       setMemos(
-        JSON.parse(saved)
+        parsed
       );
     } catch {
+      memosRef.current =
+        {};
+
       setMemos({});
     }
   }, [storageKey]);
 
 
-  /* =========================================================
-     메모 저장
-  ========================================================= */
+  /* =======================================================
+     입력 중 즉시 저장
 
-  const updateMemo = (
+     중요:
+     setMemos()를 호출하지 않습니다.
+
+     따라서 글자 하나 입력할 때마다
+     TopicPage 전체가 재렌더링되지 않습니다.
+  ======================================================= */
+
+  const saveMemoDirectly = (
     path: string,
     text: string
   ) => {
-    setMemos((previous) => {
-      const next = {
-        ...previous,
-      };
+    const next = {
+      ...memosRef.current,
+    };
 
-      if (
-        text.trim().length === 0
-      ) {
-        delete next[path];
-      } else {
-        next[path] = text;
-      }
 
-      localStorage.setItem(
-        storageKey,
-        JSON.stringify(next)
-      );
+    if (
+      text.trim().length === 0
+    ) {
+      delete next[path];
+    } else {
+      next[path] =
+        text;
+    }
 
-      return next;
+
+    memosRef.current =
+      next;
+
+
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify(next)
+    );
+  };
+
+
+  /* =======================================================
+     메모 편집이 끝났을 때
+     React state와 동기화
+  ======================================================= */
+
+  const syncMemo = (
+    path: string,
+    text: string
+  ) => {
+    saveMemoDirectly(
+      path,
+      text
+    );
+
+    setMemos({
+      ...memosRef.current,
     });
   };
 
 
-  /* =========================================================
-     펼치기
-  ========================================================= */
+  /* =======================================================
+     > 토글
+  ======================================================= */
 
   const toggleOpen = (
     path: string
   ) => {
-    setOpenItems((previous) => {
-      const next =
-        new Set(previous);
+    setOpenItems(
+      (previous) => {
+        const next =
+          new Set(previous);
 
-      if (next.has(path)) {
-        next.delete(path);
-      } else {
-        next.add(path);
+
+        if (
+          next.has(path)
+        ) {
+          next.delete(path);
+        } else {
+          next.add(path);
+        }
+
+
+        return next;
       }
-
-      return next;
-    });
+    );
   };
 
 
-  /* =========================================================
-     메모 편집
-
-     이전의 scrollY 저장 / scrollTo 코드는 삭제.
-     브라우저 스크롤을 강제로 조작하지 않음.
-  ========================================================= */
+  /* =======================================================
+     제목 클릭 → 메모 편집
+  ======================================================= */
 
   const toggleMemo = (
     path: string
   ) => {
-    setEditingMemos((previous) => {
-      const next =
-        new Set(previous);
+    /*
+      메모를 닫기 직전이라면
+      textarea의 blur가 먼저 발생하면서
+      syncMemo가 최신 값을 state에 반영합니다.
+    */
 
-      if (next.has(path)) {
-        next.delete(path);
-      } else {
-        next.add(path);
+    setEditingMemos(
+      (previous) => {
+        const next =
+          new Set(previous);
+
+
+        if (
+          next.has(path)
+        ) {
+          next.delete(path);
+        } else {
+          next.add(path);
+        }
+
+
+        return next;
       }
-
-      return next;
-    });
+    );
   };
 
 
-  /* =========================================================
-     전체 펼치기
-  ========================================================= */
+  /* =======================================================
+     전체 펼치기용 path 수집
+  ======================================================= */
 
   const collectExpandablePaths = (
     nodes: OutlineNode[],
     parentPath = ""
   ) => {
-    const paths: string[] = [];
+    const paths: string[] =
+      [];
+
 
     nodes.forEach(
       (node, index) => {
@@ -1180,31 +1621,44 @@ function TopicPage() {
             ? `${parentPath}-${index}`
             : `${index}`;
 
+
         const hasChildren =
           Boolean(
             node.children &&
-            node.children.length > 0
+            node.children.length >
+              0
           );
+
 
         const hasMemo =
           Boolean(
-            memos[path]?.trim()
+            memosRef.current[
+              path
+            ]?.trim()
           );
 
+
         const hasNote =
-          Boolean(node.note);
+          Boolean(
+            node.note
+          );
+
 
         if (
           hasChildren ||
           hasMemo ||
           hasNote
         ) {
-          paths.push(path);
+          paths.push(
+            path
+          );
         }
+
 
         if (
           node.children &&
-          node.children.length > 0
+          node.children.length >
+            0
         ) {
           paths.push(
             ...collectExpandablePaths(
@@ -1216,44 +1670,77 @@ function TopicPage() {
       }
     );
 
+
     return paths;
   };
 
 
+  /* =======================================================
+     전체 펼치기
+  ======================================================= */
+
   const openAll = () => {
-    if (!topic) return;
+    if (!topic) {
+      return;
+    }
+
+
+    /*
+      혹시 편집 중인 메모가 있으면
+      최신 ref를 state에 반영
+    */
+
+    setMemos({
+      ...memosRef.current,
+    });
+
 
     const paths =
       collectExpandablePaths(
         topic.children ?? []
       );
 
+
     setOpenItems(
       new Set(paths)
     );
 
+
     setEditingMemos(
       new Set()
     );
   };
 
 
+  /* =======================================================
+     전체 닫기
+  ======================================================= */
+
   const closeAll = () => {
+    setMemos({
+      ...memosRef.current,
+    });
+
+
     setOpenItems(
       new Set()
     );
 
+
     setEditingMemos(
       new Set()
     );
   };
 
 
-  /* =========================================================
+  /* =======================================================
      잘못된 주소
-  ========================================================= */
+  ======================================================= */
 
-  if (!part || !topic) {
+  if (
+    !part ||
+    !topic
+  ) {
     return (
       <main className="app">
         <p>
@@ -1273,12 +1760,14 @@ function TopicPage() {
   }
 
 
-  /* =========================================================
+  /* =======================================================
      화면
-  ========================================================= */
+  ======================================================= */
 
   return (
     <main className="app topic-page">
+
+      {/* 뒤로 */}
 
       <button
         className="back-button"
@@ -1292,9 +1781,12 @@ function TopicPage() {
       </button>
 
 
+      {/* 제목 */}
+
       <header className="topic-header">
         <span className="part-label">
-          PART {partNumber + 1}
+          PART{" "}
+          {partNumber + 1}
         </span>
 
         <h1>
@@ -1303,42 +1795,65 @@ function TopicPage() {
       </header>
 
 
+      {/* 전체 열기 / 닫기 */}
+
       <div className="outline-controls">
         <button
           type="button"
-          onClick={openAll}
+          onClick={
+            openAll
+          }
         >
           전체 열기
         </button>
 
         <button
           type="button"
-          onClick={closeAll}
+          onClick={
+            closeAll
+          }
         >
           전체 닫기
         </button>
       </div>
 
 
+      {/* 목차 */}
+
       <section className="outline-container">
+
         {topic.children &&
-        topic.children.length > 0 ? (
+        topic.children.length >
+          0 ? (
           topic.children.map(
-            (node, index) => {
+            (
+              node,
+              index
+            ) => {
               const path =
                 `${index}`;
 
               return (
                 <OutlineItem
-                  key={path}
+                  key={
+                    path
+                  }
 
-                  node={node}
+                  node={
+                    node
+                  }
 
-                  level={0}
+                  level={
+                    0
+                  }
 
-                  index={index}
+                  index={
+                    index
+                  }
 
-                  path={path}
+                  path={
+                    path
+                  }
 
                   openItems={
                     openItems
@@ -1348,7 +1863,9 @@ function TopicPage() {
                     editingMemos
                   }
 
-                  memos={memos}
+                  memos={
+                    memos
+                  }
 
                   toggleOpen={
                     toggleOpen
@@ -1358,8 +1875,12 @@ function TopicPage() {
                     toggleMemo
                   }
 
-                  updateMemo={
-                    updateMemo
+                  saveMemoDirectly={
+                    saveMemoDirectly
+                  }
+
+                  syncMemo={
+                    syncMemo
                   }
                 />
               );
@@ -1370,6 +1891,7 @@ function TopicPage() {
             등록된 목차가 없습니다.
           </div>
         )}
+
       </section>
     </main>
   );
