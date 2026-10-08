@@ -1758,6 +1758,44 @@ function TopicPage() {
     );
   }
 
+  const hasPreviousTopic =
+    topicNumber > 0;
+
+  const hasNextTopic =
+    topicNumber <
+    part.topics.length - 1;
+
+
+  const goToPreviousTopic = () => {
+    if (!hasPreviousTopic) {
+      return;
+    }
+
+    navigate(
+      `/part/${partNumber}/topic/${topicNumber - 1}`
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+  };
+
+
+  const goToNextTopic = () => {
+    if (!hasNextTopic) {
+      return;
+    }
+
+    navigate(
+      `/part/${partNumber}/topic/${topicNumber + 1}`
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: "instant",
+    });
+  };
 
   /* =======================================================
      화면
@@ -1909,6 +1947,49 @@ function TopicPage() {
         )}
 
       </section>
+
+      <nav
+        className="topic-navigation"
+        aria-label="목차 이동"
+      >
+        <button
+          type="button"
+          className="topic-navigation-button"
+          onClick={goToPreviousTopic}
+          disabled={!hasPreviousTopic}
+        >
+          <span className="topic-navigation-direction">
+            ← 
+          </span>
+
+          <span className="topic-navigation-title">
+            {hasPreviousTopic
+              ? part.topics[
+                topicNumber - 1
+              ].title
+              : "이전 목차 없음"}
+          </span>
+        </button>
+
+
+        <button
+          type="button"
+          className="topic-navigation-button topic-navigation-next"
+          onClick={goToNextTopic}
+          disabled={!hasNextTopic}
+        >
+          <span className="topic-navigation-title">
+            {hasNextTopic
+              ? part.topics[
+                topicNumber + 1
+              ].title
+              : "다음 목차 없음"}
+          </span>
+          <span className="topic-navigation-direction">
+             →
+          </span>
+        </button>
+      </nav>
     </main>
   );
 }

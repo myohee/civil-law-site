@@ -106,8 +106,7 @@ button {
   background: #fdfdfb;
 
   box-shadow:
-    0 5px 18px
-    rgba(0, 0, 0, 0.04);
+    0 5px 18px rgba(0, 0, 0, 0.04);
 }
 
 .part-number {
@@ -236,9 +235,7 @@ button {
   display: grid;
 
   grid-template-columns:
-    46px
-    minmax(0, 1fr)
-    24px;
+    46px minmax(0, 1fr) 24px;
 
   align-items: center;
 
@@ -435,9 +432,7 @@ button {
   display: grid;
 
   grid-template-columns:
-    42px
-    minmax(0, 1fr)
-    32px;
+    42px minmax(0, 1fr) 32px;
 
   align-items: center;
 
@@ -577,22 +572,22 @@ button {
    ①
 ========================================================= */
 
-.outline-level-0 > .outline-row {
+.outline-level-0>.outline-row {
   font-size: 19px;
   font-weight: 600;
 }
 
-.outline-level-1 > .outline-row {
+.outline-level-1>.outline-row {
   font-size: 18px;
   font-weight: 500;
 }
 
-.outline-level-2 > .outline-row {
+.outline-level-2>.outline-row {
   font-size: 17px;
   font-weight: 450;
 }
 
-.outline-level-3 > .outline-row {
+.outline-level-3>.outline-row {
   font-size: 16px;
   font-weight: 400;
 }
@@ -600,8 +595,8 @@ button {
 
 /* 4단계 이후 */
 
-.outline-level-4 > .outline-row,
-.outline-level-5 > .outline-row {
+.outline-level-4>.outline-row,
+.outline-level-5>.outline-row {
   font-size: 15px;
   font-weight: 400;
 }
@@ -705,10 +700,7 @@ button {
   width: 100%;
 
   padding:
-    6px
-    11px
-    6px
-    12px;
+    6px 11px 6px 12px;
 
   border-left:
     2px solid #ddddD7;
@@ -762,6 +754,42 @@ button {
   white-space: pre-wrap;
 }
 
+/* =========================================================
+   이전 다음 목차
+========================================================= */
+.topic-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 48px;
+  padding-top: 20px;
+
+  border-top: 1px solid #edede9;
+}
+
+.topic-navigation button {
+  padding: 7px 10px;
+
+  border: none;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #888;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+
+.topic-navigation button:disabled {
+  visibility: hidden;
+}
 
 /* =========================================================
    태블릿
@@ -771,11 +799,22 @@ button {
 
   .app {
     padding:
-      44px
-      24px
-      90px;
+      44px 24px 90px;
   }
 
+  .topic-navigation {
+    gap: 8px;
+    margin-top: 40px;
+  }
+
+  .topic-navigation-button {
+    min-height: 74px;
+    padding: 13px;
+  }
+
+  .topic-navigation-title {
+    font-size: 13px;
+  }
 }
 
 /* =========================================================
@@ -876,9 +915,7 @@ button {
 
   .app {
     padding:
-      30px
-      18px
-      70px;
+      30px 18px 70px;
   }
 
 
@@ -921,15 +958,12 @@ button {
 
   .topic-card {
     grid-template-columns:
-      38px
-      minmax(0, 1fr)
-      20px;
+      38px minmax(0, 1fr) 20px;
 
     min-height: 54px;
 
     padding:
-      9px
-      12px;
+      9px 12px;
   }
 
   .topic-title {
@@ -954,9 +988,7 @@ button {
 
   .outline-row {
     grid-template-columns:
-      36px
-      minmax(0, 1fr)
-      29px;
+      36px minmax(0, 1fr) 29px;
 
     min-height: 39px;
   }
@@ -968,19 +1000,19 @@ button {
 
   /* 글자 크기 */
 
-  .outline-level-0 > .outline-row {
+  .outline-level-0>.outline-row {
     font-size: 18px;
   }
 
-  .outline-level-1 > .outline-row {
+  .outline-level-1>.outline-row {
     font-size: 17px;
   }
 
-  .outline-level-2 > .outline-row {
+  .outline-level-2>.outline-row {
     font-size: 16px;
   }
 
-  .outline-level-3 > .outline-row {
+  .outline-level-3>.outline-row {
     font-size: 15px;
   }
 
@@ -1015,8 +1047,7 @@ button {
 
   .outline-controls button {
     padding:
-      6px
-      9px;
+      6px 9px;
 
     font-size: 11px;
   }
@@ -1041,28 +1072,26 @@ button {
 
   .outline-row {
     grid-template-columns:
-      32px
-      minmax(0, 1fr)
-      27px;
+      32px minmax(0, 1fr) 27px;
   }
 
-  .outline-level-0 > .outline-row {
+  .outline-level-0>.outline-row {
     font-size: 17px;
   }
 
-  .outline-level-1 > .outline-row {
+  .outline-level-1>.outline-row {
     font-size: 16px;
   }
 
-  .outline-level-2 > .outline-row {
+  .outline-level-2>.outline-row {
     font-size: 15px;
   }
 
-  .outline-level-3 > .outline-row {
+  .outline-level-3>.outline-row {
     font-size: 14px;
   }
 
-    .backup-section {
+  .backup-section {
     align-items: flex-start;
 
     flex-direction: column;
