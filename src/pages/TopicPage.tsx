@@ -628,7 +628,7 @@ function MemoEditor({
       textarea,
       newValue,
       start +
-        insertion.length
+      insertion.length
     );
   };
 
@@ -735,7 +735,7 @@ function MemoEditor({
           Math.max(
             lineStart,
             start -
-              removeCount
+            removeCount
           )
         );
 
@@ -762,7 +762,7 @@ function MemoEditor({
         textarea,
         newValue,
         start +
-          INDENT.length
+        INDENT.length
       );
 
       return;
@@ -793,7 +793,7 @@ function MemoEditor({
             Math.max(
               0,
               newIndent.length -
-                INDENT.length
+              INDENT.length
             )
           );
       } else {
@@ -832,7 +832,7 @@ function MemoEditor({
         Math.max(
           lineStart,
           oldPosition +
-            difference
+          difference
         )
       );
 
@@ -892,11 +892,11 @@ function MemoEditor({
       ) {
         const newIndent =
           parsed.indent.length >=
-          INDENT.length
+            INDENT.length
             ? parsed.indent.slice(
-                0,
-                -INDENT.length
-              )
+              0,
+              -INDENT.length
+            )
             : "";
 
         newLine =
@@ -908,11 +908,11 @@ function MemoEditor({
       ) {
         const newIndent =
           parsed.indent.length >=
-          INDENT.length
+            INDENT.length
             ? parsed.indent.slice(
-                0,
-                -INDENT.length
-              )
+              0,
+              -INDENT.length
+            )
             : "";
 
         newLine =
@@ -930,11 +930,11 @@ function MemoEditor({
 
         const newIndent =
           parsed.indent.length >=
-          INDENT.length
+            INDENT.length
             ? parsed.indent.slice(
-                0,
-                -INDENT.length
-              )
+              0,
+              -INDENT.length
+            )
             : "";
 
         newLine =
@@ -978,7 +978,7 @@ function MemoEditor({
       Math.max(
         0,
         cursorOffset +
-          lengthDifference
+        lengthDifference
       );
 
 
@@ -1199,10 +1199,9 @@ function OutlineItem({
             <button
               type="button"
               className={
-                `outline-toggle ${
-                  isOpen
-                    ? "open"
-                    : ""
+                `outline-toggle ${isOpen
+                  ? "open"
+                  : ""
                 }`
               }
               onClick={() =>
@@ -1380,13 +1379,13 @@ function TopicPage() {
 
   const part =
     civilData.parts[
-      partNumber
+    partNumber
     ];
 
 
   const topic =
     part?.topics[
-      topicNumber
+    topicNumber
     ];
 
 
@@ -1626,7 +1625,7 @@ function TopicPage() {
           Boolean(
             node.children &&
             node.children.length >
-              0
+            0
           );
 
 
@@ -1658,7 +1657,7 @@ function TopicPage() {
         if (
           node.children &&
           node.children.length >
-            0
+          0
         ) {
           paths.push(
             ...collectExpandablePaths(
@@ -1823,8 +1822,8 @@ function TopicPage() {
       <section className="outline-container">
 
         {topic.children &&
-        topic.children.length >
-          0 ? (
+          topic.children.length > 0 ? (
+
           topic.children.map(
             (
               node,
@@ -1835,25 +1834,15 @@ function TopicPage() {
 
               return (
                 <OutlineItem
-                  key={
-                    path
-                  }
+                  key={path}
 
-                  node={
-                    node
-                  }
+                  node={node}
 
-                  level={
-                    0
-                  }
+                  level={0}
 
-                  index={
-                    index
-                  }
+                  index={index}
 
-                  path={
-                    path
-                  }
+                  path={path}
 
                   openItems={
                     openItems
@@ -1886,10 +1875,37 @@ function TopicPage() {
               );
             }
           )
+
         ) : (
-          <div className="empty-outline">
-            등록된 목차가 없습니다.
+
+          <div className="empty-topic-memo">
+
+            <MemoEditor
+              initialValue={
+                memos["topic"] ?? ""
+              }
+
+              onSaveDirectly={(
+                value
+              ) =>
+                saveMemoDirectly(
+                  "topic",
+                  value
+                )
+              }
+
+              onSync={(
+                value
+              ) =>
+                syncMemo(
+                  "topic",
+                  value
+                )
+              }
+            />
+
           </div>
+
         )}
 
       </section>
