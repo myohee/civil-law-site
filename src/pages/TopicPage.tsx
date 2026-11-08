@@ -1834,25 +1834,24 @@ function TopicPage() {
 
       {/* 전체 열기 / 닫기 */}
 
-      <div className="outline-controls">
-        <button
-          type="button"
-          onClick={
-            openAll
-          }
-        >
-          전체 열기
-        </button>
+      {topic.children &&
+        topic.children.length > 0 && (
+          <div className="outline-controls">
+            <button
+              type="button"
+              onClick={openAll}
+            >
+              전체 열기
+            </button>
 
-        <button
-          type="button"
-          onClick={
-            closeAll
-          }
-        >
-          전체 닫기
-        </button>
-      </div>
+            <button
+              type="button"
+              onClick={closeAll}
+            >
+              전체 닫기
+            </button>
+          </div>
+        )}
 
 
       {/* 목차 */}
@@ -1918,29 +1917,55 @@ function TopicPage() {
 
           <div className="empty-topic-memo">
 
-            <MemoEditor
-              initialValue={
-                memos["topic"] ?? ""
-              }
+            {editingMemos.has("topic") ? (
 
-              onSaveDirectly={(
-                value
-              ) =>
-                saveMemoDirectly(
-                  "topic",
-                  value
-                )
-              }
+              <MemoEditor
+                initialValue={
+                  memos["topic"] ?? ""
+                }
 
-              onSync={(
-                value
-              ) =>
-                syncMemo(
-                  "topic",
-                  value
-                )
-              }
-            />
+                onSaveDirectly={(value) =>
+                  saveMemoDirectly(
+                    "topic",
+                    value
+                  )
+                }
+
+                onSync={(value) =>
+                  syncMemo(
+                    "topic",
+                    value
+                  )
+                }
+              />
+
+            ) : memos["topic"]?.trim() ? (
+
+              <button
+                type="button"
+                className="topic-memo-display-button"
+                onClick={() =>
+                  toggleMemo("topic")
+                }
+              >
+                <MemoDisplay
+                  text={memos["topic"]}
+                />
+              </button>
+
+            ) : (
+
+              <button
+                type="button"
+                className="empty-topic-memo-button"
+                onClick={() =>
+                  toggleMemo("topic")
+                }
+              >
+                + 메모 작성
+              </button>
+
+            )}
 
           </div>
 
@@ -1959,7 +1984,7 @@ function TopicPage() {
           disabled={!hasPreviousTopic}
         >
           <span className="topic-navigation-direction">
-            ← 
+            ←
           </span>
 
           <span className="topic-navigation-title">
@@ -1986,7 +2011,7 @@ function TopicPage() {
               : "다음 목차 없음"}
           </span>
           <span className="topic-navigation-direction">
-             →
+            →
           </span>
         </button>
       </nav>
